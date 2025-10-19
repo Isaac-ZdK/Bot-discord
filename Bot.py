@@ -17,6 +17,9 @@ ytdl_format_options = {
     'noplaylist': True,
     'quiet': True,
     'default_search': 'ytsearch',
+    'restrictfilenames': True,
+    'no_warnings': True,
+    
 }
 ffmpeg_options = {
     'options': '-vn'
@@ -29,6 +32,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         super().__init__(source, volume)
         self.data = data
         self.title = data.get("title")
+        self.url = data.get("url")
 
     @classmethod
     async def from_url(cls, url, *, loop=None, stream=False):
@@ -63,7 +67,7 @@ async def play(ctx, *, url):
             return await ctx.send("Você precisa estar em um canal de Voz!!")
 
     async with ctx.typing():
-        player = await YTDLSource.from_url(url, loop=bot.loop, stream=True)
+        player = await YTDLSource.from_url(url, loop=bot.loop, stream=False)
         fila = get_fila(ctx.guild.id)
 
         if not ctx.voice_client.is_playing():
@@ -76,7 +80,7 @@ async def play(ctx, *, url):
             fila.append(player)
             await ctx.send(f"➕ Adicionado à fila: **{player.title}**")
 
-@bot.command(aliases=["skip", "next", "pular", "s",  "S"])
+@bot.command()
 async def skip(ctx):
     você = ctx.voice_client
     if você and você.is_playing():
@@ -116,4 +120,4 @@ async def play_next(ctx):
 
 
 
-bot.run("Token teste")
+bot.run("Teste")
