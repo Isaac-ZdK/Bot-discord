@@ -61,25 +61,13 @@ async def play(ctx, *, url):
             await ctx.author.voice.channel.connect()
         else:
             return await ctx.send("Você precisa estar em um canal de Voz!!")
-        
-@bot.command()
-async def skip(ctx):
-    if ctx.author.voice_client:
-        await ctx.voice_client.skip()
-        await ctx.send("Musica pulada")
-    else:
-        await ctx.sendo("não está tocando nenhuma musica no momento")
-
-        
 
     async with ctx.typing():
-        player  = await YTDLSource.from_url(url, loop=bot.loop, stream=True)
+        player = await YTDLSource.from_url(url, loop=bot.loop, stream=True)
         fila = get_fila(ctx.guild.id)
-
 
         if not ctx.voice_client.is_playing():
             ctx.voice_client.play(
-
                 player,
                 after=lambda e: asyncio.run_coroutine_threadsafe(play_next(ctx), bot.loop)
             )
@@ -87,6 +75,15 @@ async def skip(ctx):
         else:
             fila.append(player)
             await ctx.send(f"➕ Adicionado à fila: **{player.title}**")
+
+@bot.command(aliases=["skip", "next", "pular", "s",  "S"])
+async def skip(ctx):
+    você = ctx.voice_client
+    if você and você.is_playing():
+        você.stop()
+        await ctx.send("Musica pulada")
+    else:
+        await ctx.send("não está tocando nenhuma musica no momento")
   
 @bot.command()
 async def  stop(ctx):
@@ -104,24 +101,19 @@ def get_fila(guild_id):
         fila[guild_id] = []
     return fila[guild_id]
 
-
 async def play_next(ctx):
     fila = get_fila(ctx.guild.id)
 
     if len(fila) > 0:
         player = fila.pop(0)
-        ctx.voice_cliente.play(
+        ctx.voice_client.play(
             player,
             after=lambda e: asyncio.run_coroutine_threadsafe(play_next(ctx), bot.loop)
-
         )
         await ctx.send(f"Tocando agora: **{player.title}**")
     else:
         await ctx.send("A fila encerrou, nenhuma musica restante.")
 
-@bot.command()
-async def falar(ctx: commands.Context, *, texto):
-    await ctx.send(texto)
 
 
-bot.run("Test")
+bot.run("Token teste")
